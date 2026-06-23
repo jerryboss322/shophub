@@ -18,13 +18,13 @@
   ];
 
   onMount(async () => {
-    const params      = new URLSearchParams($page.url.search);
-    searchQ           = params.get('q') ?? '';
-    selectedCategory  = params.get('category') ?? '';
-    sortBy            = params.get('sort') ?? 'newest';
-    const res         = await fetch('/api/products');
-    allProducts       = await res.json();
-    loading           = false;
+    const params     = new URLSearchParams($page.url.search);
+    searchQ          = params.get('q') ?? '';
+    selectedCategory = params.get('category') ?? '';
+    sortBy           = params.get('sort') ?? 'newest';
+    const res        = await fetch('/api/products');
+    allProducts      = await res.json();
+    loading          = false;
   });
 
   function addToCart(product: any) {
@@ -87,17 +87,18 @@
     <!-- Sidebar -->
     <aside class="lg:w-56 flex-shrink-0">
       <div class="card p-5 space-y-6 sticky top-24">
+
         <div>
-          <label class="text-xs font-bold uppercase tracking-widest text-muted mb-3 block">Search</label>
+          <label for="catalog-search" class="text-xs font-bold uppercase tracking-widest text-muted mb-3 block">Search</label>
           <div class="relative">
             <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-            <input type="search" bind:value={searchQ} placeholder="Search..." class="input pl-9 text-sm"/>
+            <input id="catalog-search" type="search" bind:value={searchQ} placeholder="Search..." class="input pl-9 text-sm"/>
           </div>
         </div>
 
         <div>
-          <label class="text-xs font-bold uppercase tracking-widest text-muted mb-3 block">Category</label>
-          <div class="space-y-1">
+          <p class="text-xs font-bold uppercase tracking-widest text-muted mb-3">Category</p>
+          <div class="space-y-1" role="group" aria-label="Filter by category">
             <button on:click={() => selectedCategory = ''} class="w-full text-left px-3 py-2 rounded-xl text-sm transition font-medium {!selectedCategory ? 'bg-primary text-white' : 'text-muted hover:bg-primary/5 hover:text-primary'}">All</button>
             {#each CATEGORIES as cat}
               <button on:click={() => selectedCategory = cat} class="w-full text-left px-3 py-2 rounded-xl text-sm transition {selectedCategory===cat ? 'bg-primary text-white font-medium' : 'text-muted hover:bg-primary/5 hover:text-primary'}">{cat}</button>
@@ -106,8 +107,8 @@
         </div>
 
         <div>
-          <label class="text-xs font-bold uppercase tracking-widest text-muted mb-3 block">Sort by</label>
-          <select bind:value={sortBy} class="input text-sm bg-bg">
+          <label for="catalog-sort" class="text-xs font-bold uppercase tracking-widest text-muted mb-3 block">Sort by</label>
+          <select id="catalog-sort" bind:value={sortBy} class="input text-sm bg-bg">
             {#each SORT_OPTIONS as opt}<option value={opt.value}>{opt.label}</option>{/each}
           </select>
         </div>
@@ -133,7 +134,7 @@
         <div class="grid grid-cols-2 sm:grid-cols-3 gap-5">
           {#each paginated as product, i}
             <div class="group relative flex flex-col animate-fade-up" style="animation-delay:{(i%6)*50}ms">
-              <button on:click={() => toggleWishlist(product)} class="absolute top-3 right-3 z-10 w-7 h-7 rounded-full bg-surface/90 grid place-items-center shadow-card opacity-0 group-hover:opacity-100 transition" aria-label="Wishlist">
+              <button on:click={() => toggleWishlist(product)} class="absolute top-3 right-3 z-10 w-7 h-7 rounded-full bg-surface/90 grid place-items-center shadow-card opacity-0 group-hover:opacity-100 transition" aria-label="Toggle wishlist for {product.name}">
                 <svg class="w-3.5 h-3.5" class:text-danger={isWishlisted(product.id)} class:text-muted={!isWishlisted(product.id)} fill={isWishlisted(product.id)?'currentColor':'none'} stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
               </button>
               <a href="/product/{product.id}" class="block">
@@ -151,11 +152,15 @@
 
         {#if totalPages > 1}
           <div class="flex items-center justify-center gap-2 mt-12">
-            <button on:click={() => currentPage = Math.max(1, currentPage - 1)} disabled={currentPage === 1} class="w-9 h-9 rounded-xl border border-primary/10 grid place-items-center text-muted hover:bg-primary/5 transition disabled:opacity-30"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+            <button on:click={() => currentPage = Math.max(1, currentPage - 1)} disabled={currentPage === 1} class="w-9 h-9 rounded-xl border border-primary/10 grid place-items-center text-muted hover:bg-primary/5 transition disabled:opacity-30" aria-label="Previous page">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+            </button>
             {#each Array(totalPages) as _, i}
-              <button on:click={() => currentPage = i+1} class="w-9 h-9 rounded-xl text-sm font-semibold transition {currentPage===i+1?'bg-primary text-white':'border border-primary/10 text-muted hover:bg-primary/5'}">{i+1}</button>
+              <button on:click={() => currentPage = i+1} class="w-9 h-9 rounded-xl text-sm font-semibold transition {currentPage===i+1?'bg-primary text-white':'border border-primary/10 text-muted hover:bg-primary/5'}" aria-label="Page {i+1}" aria-current={currentPage===i+1 ? 'page' : undefined}>{i+1}</button>
             {/each}
-            <button on:click={() => currentPage = Math.min(totalPages, currentPage + 1)} disabled={currentPage === totalPages} class="w-9 h-9 rounded-xl border border-primary/10 grid place-items-center text-muted hover:bg-primary/5 transition disabled:opacity-30"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>
+            <button on:click={() => currentPage = Math.min(totalPages, currentPage + 1)} disabled={currentPage === totalPages} class="w-9 h-9 rounded-xl border border-primary/10 grid place-items-center text-muted hover:bg-primary/5 transition disabled:opacity-30" aria-label="Next page">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+            </button>
           </div>
         {/if}
       {/if}
